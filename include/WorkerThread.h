@@ -11,13 +11,14 @@ namespace MMA{
 
         public:
             /* typename... Args是不定参数 
-                std::forward<Func>(func)完美转发
+                std::forward<Func>(func)完美转发，背诵一下
             */
             template<typename Func, typename... Args>
             WorkerThread(Func&& func,Args&&... args){
                 worker = std::move(std::thread(std::forward<Func>(func),std::forward<Args>(args)...));
             }
 
+            /* 移动赋值 */
             WorkerThread& operator=(WorkerThread&& other) noexcept{
                 if(this != &other)
                 {
