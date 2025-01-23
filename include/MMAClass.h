@@ -5,7 +5,7 @@
 #include <functional>
 #include <algorithm>
 
-namespace{
+namespace MMA{
     template<typename T>
     class MMAClass{
         private:
@@ -68,10 +68,13 @@ namespace{
                     Compute(func,Thread_num);
                 }
                 std::clock_t c_end = std::clock();
-                float time_cost = (c_end - c_start) / CLOCKS_PER_SEC / num;
+                float time_cost = (c_end - c_start) / CLOCKS_PER_SEC / num * 1000;
                 std::cout<<"-----------------------------"<<std::endl;
-                std::cout<<"线程数为"<<Thread_num <<" 所耗费的时间为: "<<time_cost<<std::endl;
+                std::cout<<"线程数为"<<Thread_num <<" 所耗费的时间为: "<<time_cost<<"ms"<<std::endl;
                 std::cout<<"-----------------------------"<<std::endl;
+
+                void MMAOrigin();
+                
             }
 
             template<typename Func>
@@ -79,15 +82,15 @@ namespace{
                 func(this->_A_data,this->_B_data,this->_C_data,this->_M,this->_N,this->_K,Thread_num);
             }
 
-            template <typename Func>
-            bool CheckMulMul(Func func,int Thread_num){
-                std::cout<<"检查计算是否有问题"<<std::endl;
-                InitMatric(_C_size,_C_size,0);
-                Compute(func,Thread_num);
-                return MMAOrigin();
-            }
+            // template <typename Func>
+            // bool CheckMulMul(Func func,int Thread_num){
+            //     std::cout<<"检查计算是否有问题"<<std::endl;
+            //     //InitMatric(_C_size,_C_size,0);
+            //     Compute(func,Thread_num);
+            //     return MMAOrigin();
+            // }
 
-            bool MMAOrigin(){
+            void MMAOrigin(){
                 #pragma unroll
                 for(int i = 0 ;i <M;i++){
                     #pragma unroll
@@ -104,7 +107,7 @@ namespace{
                     }
                 }
                 std::cout<<"计算无误"<<std::endl;
-                return true;
+                //return true;
 
             }
 

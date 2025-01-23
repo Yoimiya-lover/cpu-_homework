@@ -94,7 +94,7 @@ namespace MMA{
     //ElemType* B_ptr = const_cast<ElemType*>(B)+b_base_pos+j;
 
     /* SSE指令优化+循环展开+调整循环位置+寄存器索引 ，暂时存疑*/
-    void MatrixMulOrign_v4(Elemtype* A,Elemtype* B,Elemtype* C,const int M,const int N,const int K){
+    void MatrixMulOrign_v4(Elemtype* A,Elemtype* B,Elemtype* C,const int M,const int K,const int N,const int Thread_Num){
         #pragma unroll
         register int a_pos = 0;
         register int c_pos = 0;
@@ -133,7 +133,7 @@ namespace MMA{
     }
 
     /* SSE指令优化+循环展开+调整循环位置+寄存器索引 + 多线程*/
-    void MatrixMulOrign_v5(Elemtype* A,Elemtype* B,Elemtype* C,const int M,const int N,const int K,const int ThreadNum){
+    void MatrixMulOrign_v5(Elemtype* A,Elemtype* B,Elemtype* C,const int M,const int K,const int N,const int ThreadNum){
         const int row_block_size = (M + ThreadNum - 1) / ThreadNum;//向上取整，每个线程处理行数
         std::vector<MMA::WorkerThread*> Workers(ThreadNum);
         for(int i = 0;i < ThreadNum;i++){
