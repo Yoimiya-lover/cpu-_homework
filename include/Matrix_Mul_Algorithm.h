@@ -8,7 +8,7 @@
 namespace MMA{
     using Elemtype = float;
     /* A:M*K,B:K*N,C:M*N,原始矩阵乘法实现方式 */
-    void MatrixMulOrign(Elemtype* A,Elemtype* B,Elemtype* C,const int M,const int N,const int K){
+    void MatrixMulOrign(Elemtype* A,Elemtype* B,Elemtype* C,const int M,const int K,const int N){
         for(int i = 0 ;i <M;i++){
             for(int j = 0;j < N;j++){
                 for(int k = 0;k < K;k++){
@@ -20,7 +20,7 @@ namespace MMA{
     }
 
     /* 循环展开 */
-      void MatrixMulOrign_v0(Elemtype* A,Elemtype* B,Elemtype* C,const int M,const int N,const int K){
+      void MatrixMulOrign_v0(Elemtype* A,Elemtype* B,Elemtype* C,const int M,const int K,const int N){
         #pragma unroll
         for(int i = 0 ;i <M;i++){
             #pragma unroll
@@ -35,7 +35,7 @@ namespace MMA{
     }
 
     /* 循环展开+寄存器 */
-    void MatrixMulOrign_v1(Elemtype* A,Elemtype* B,Elemtype* C,const int M,const int N,const int K){
+    void MatrixMulOrign_v1(Elemtype* A,Elemtype* B,Elemtype* C,const int M,const int K,const int N){
         #pragma unroll
         for(int i = 0 ;i <M;i++){
             #pragma unroll
@@ -52,7 +52,7 @@ namespace MMA{
     }
 
     /* 循环展开+调整循环位置+寄存器值 */
-    void MatrixMulOrign_v2(Elemtype* A,Elemtype* B,Elemtype* C,const int M,const int N,const int K){
+    void MatrixMulOrign_v2(Elemtype* A,Elemtype* B,Elemtype* C,const int M,const int K,const int N){
         #pragma unroll
         for(int i = 0 ;i < M;i++){
             #pragma unroll
@@ -69,7 +69,7 @@ namespace MMA{
     }
 
     /* 循环展开+调整循环位置+寄存器索引 */
-    void MatrixMulOrign_v3(Elemtype* A,Elemtype* B,Elemtype* C,const int M,const int N,const int K){
+    void MatrixMulOrign_v3(Elemtype* A,Elemtype* B,Elemtype* C,const int M,const int K,const int N){
         #pragma unroll
         register int a_pos = 0;
         register int c_pos = 0;
@@ -93,42 +93,38 @@ namespace MMA{
 
     //ElemType* B_ptr = const_cast<ElemType*>(B)+b_base_pos+j;
 
-    /* SSE指令优化+循环展开+调整循环位置+寄存器索引 ，暂时存疑*/
+    /* SSE指令优化+循环展开+调整循环位置+寄存器索引 ，A矩阵按列访问，B矩阵按照访问暂时存疑*/
     void MatrixMulOrign_v4(Elemtype* A,Elemtype* B,Elemtype* C,const int M,const int K,const int N,const int Thread_Num){
+         register int b_base_pos = 0;
+
+    #pragma unroll
+    for(int k = 0; k < K; k++) {
+        register int a_base_pos = 0;
+        register int c_base_pos = 0;
+
         #pragma unroll
-        register int a_pos = 0;
-        register int c_pos = 0;
-        for(int i = 0 ;i < M;i++){
-            register int b_pos = 0;
+        for(int i = 0; i < M; i++) {
+            register Elemtype tmp_ar = static_cast<Elemtype>(A[a_base_pos+k]);
+            __m128 tmp_a = _mm_setr_ps(tmp_ar, tmp_ar, tmp_ar, tmp_ar);
             #pragma unroll
-            for(int k = 0;k < K;k += 4){
-                //register Elemtype tmp_a = static_cast<Elemtype>(A[a_pos + k]);
-                Elemtype* A_ptr = const_cast<Elemtype*>(A)+a_pos + k;
-                __m128 a = _mm_loadu_ps(A_ptr);
-                __m128 c = _mm_setzero_ps();
-                #pragma unroll
-                for(int j = 0;j < N;j += 4){
-                    //C[c_pos + j] = tmp_a * B[b_pos + j];
-                    
-
-                    Elemtype tmp_b[4];
-                    tmp_b[0] = B[b_pos + j];
-                    tmp_b[1] = B[b_pos + j+1 * N];
-                    tmp_b[2] = B[b_pos + j+2 * N];
-                    tmp_b[3] = B[b_pos + j+3 * N];
-
-                    __m128 b = _mm_loadu_ps(tmp_b);
-                    c = _mm_add_ps(c,_mm_mul_ps(a,b));
-                    Elemtype* C_ptr = const_cast<Elemtype*>(C) + c_pos + j;
-                    _mm_storeu_ps(C_ptr,c);
-                    
-                }
-                b_pos += N;
+            for(int j = 0; j < N; j += 4) {
                 
+                // 依赖关系：1->3->5->6->7; 2->4->6->7。所以在这里指令1,3,5和指令2,4交叉执行以换取指令流水线最大的吞吐量
+                Elemtype* B_ptr = const_cast<Elemtype*>(B)+b_base_pos+j;     //instruction 1
+                Elemtype* C_ptr = const_cast<Elemtype*>(C)+c_base_pos+j;     //instruction 2
+
+                __m128 tmp_b = _mm_loadu_ps(B_ptr);         //instruction 3
+                __m128 tmp_c = _mm_loadu_ps(C_ptr);         //instruction 4
+                __m128 mul_c = _mm_mul_ps(tmp_a, tmp_b);    //instruction 5
+                tmp_c = _mm_add_ps(mul_c, tmp_c);           //instruction 6
+                _mm_storeu_ps(C_ptr, tmp_c);                //instruction 7
             }
-            a_pos += K;
-            c_pos += N;
+
+            a_base_pos += K;
+            c_base_pos += N;
         }
+        b_base_pos += N;
+    }
 
     }
 
