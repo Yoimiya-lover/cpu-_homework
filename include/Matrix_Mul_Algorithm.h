@@ -93,7 +93,7 @@ namespace MMA{
 
     //ElemType* B_ptr = const_cast<ElemType*>(B)+b_base_pos+j;
 
-    /* SSE指令优化+循环展开+调整循环位置+寄存器索引 ，A矩阵按列访问，B矩阵按照访问暂时存疑*/
+    /* SSE指令优化+循环展开+调整循环位置+寄存器索引 ，A矩阵按列访问，B矩阵按照访问 */
     void MatrixMulOrign_v4(Elemtype* A,Elemtype* B,Elemtype* C,const int M,const int K,const int N,const int Thread_Num){
          register int b_base_pos = 0;
 
