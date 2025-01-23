@@ -91,11 +91,11 @@ namespace MMA{
 
     }
 
-    //ElemType* B_ptr = const_cast<ElemType*>(B)+b_base_pos+j;
+    //Elemtype* B_ptr = const_cast<Elemtype*>(B)+b_base_pos+j;
 
     /* SSE指令优化+循环展开+调整循环位置+寄存器索引 ，A矩阵按列访问，B矩阵按照访问 */
     void MatrixMulOrign_v4(Elemtype* A,Elemtype* B,Elemtype* C,const int M,const int K,const int N,const int Thread_Num){
-         register int b_base_pos = 0;
+    register int b_base_pos = 0;
 
     #pragma unroll
     for(int k = 0; k < K; k++) {
@@ -140,8 +140,8 @@ namespace MMA{
             int M_NEW = std::min(cur_pos + row_block_size,M) - cur_pos;
             int K_NEW = K;
             int N_NEW = N;
-
-            Workers[i] = new MMA::WorkerThread(MatrixMulOrign_v4, A_new_ptr, B_new_ptr, C_new_ptr, M_NEW, K_NEW, N_NEW);//new出来的注意delete
+            //std::cout<< i << "---> 输出A_new_ptr="<<A_new_ptr << "; B_new_ptr=" << B_new_ptr << "C_new_ptr="<< C_new_ptr <<std::endl;
+            Workers[i] = new MMA::WorkerThread(MatrixMulOrign_v4, A_new_ptr, B_new_ptr, C_new_ptr, M_NEW, K_NEW, N_NEW, 1);//new出来的注意delete
 
         }
         for(int i = 0;i < ThreadNum;i++)

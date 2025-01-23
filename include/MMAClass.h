@@ -68,7 +68,7 @@ namespace MMA{
                     Compute(func,Thread_num);
                 }
                 std::clock_t c_end = std::clock();
-                float time_cost = (c_end - c_start) / CLOCKS_PER_SEC / num * 1000;
+                float time_cost = 1000.0 * (c_end - c_start) / CLOCKS_PER_SEC / num ;
                 std::cout<<"-----------------------------"<<std::endl;
                 std::cout<<"线程数为"<<Thread_num <<" 所耗费的时间为: "<<time_cost<<"ms"<<std::endl;
                 std::cout<<"-----------------------------"<<std::endl;
@@ -79,7 +79,7 @@ namespace MMA{
 
             template<typename Func>
             void Compute(Func func,int Thread_num){
-                func(this->_A_data,this->_B_data,this->_C_data,this->_M,this->_N,this->_K,Thread_num);
+                func(this->_A_data,this->_B_data,this->_C_data,this->_M,this->_K,this->_N,Thread_num);
             }
 
             // template <typename Func>
