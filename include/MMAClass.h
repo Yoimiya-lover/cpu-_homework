@@ -78,7 +78,7 @@ namespace MMA{
             }
 
             template<typename Func>
-            Compute(Func func,int Thread_num){
+            void Compute(Func func,int Thread_num){
                 func(this->_A_data,this->_B_data,this->_C_data,this->_M,this->_N,this->_K,Thread_num);
             }
 
@@ -92,17 +92,17 @@ namespace MMA{
 
             void MMAOrigin(){
                 #pragma unroll
-                for(int i = 0 ;i <M;i++){
+                for(int i = 0 ;i <_M;i++){
                     #pragma unroll
-                    for(int j = 0;j < N;j++){
+                    for(int j = 0;j < _N;j++){
                         #pragma unroll
-                        register Elemtype tmp_c = static_cast<Elemtype>(0);/* 使用静态转换 */
-                        for(int k = 0;k < K;k++){
-                            tmp_c += A[i * K + k] * B[k * N + j];
+                        register T tmp_c = static_cast<T>(0);/* 使用静态转换 */
+                        for(int k = 0;k < _K;k++){
+                            tmp_c += _A_data[i * _K + k] * _B_data[k * _N + j];
                         }
-                        if(C[i * N + j] != tmp_c){
+                        if(_C_data[i * _N + j] != tmp_c){
                             std::cout<<"计算有误"<<"C["<<i<<"]"<<"["<<j<<"]"<<std::endl;
-                            return false;
+                            //return false;
                         }
                     }
                 }

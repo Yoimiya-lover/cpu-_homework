@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC -shared -Wl,-soname,libMatrix_Mul_Algorithm.so -o libMatrix_Mul_Algorithm.so CMakeFiles/Matrix_Mul_Algorithm.dir/Matrix_Mul_Algorithm.cc.o   -L/home/test/cpu_new_homework_jikai/build  -Wl,-rpath,/home/test/cpu_new_homework_jikai/build: libWorkerThread.so 

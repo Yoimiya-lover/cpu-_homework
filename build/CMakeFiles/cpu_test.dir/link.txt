@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/cpu_test.dir/MMAtest.cc.o -o cpu_test   -L/home/test/cpu_new_homework_jikai/build  -Wl,-rpath,/home/test/cpu_new_homework_jikai/build: libMatrix_Mul_Algorithm.so libWorkerThread.so libMMAClass.so 
